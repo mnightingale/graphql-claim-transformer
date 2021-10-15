@@ -11,8 +11,11 @@ $util.qr($context.args.input.put(\\"createdAt\\", $util.defaultIfNull($ctx.args.
 $util.qr($context.args.input.put(\\"updatedAt\\", $util.defaultIfNull($ctx.args.input.updatedAt, $createdAt)))
 ## [End] Set default values. **
 ## [Start] Setting \\"foo\\" to claim \\"bar\\". **
-#if( !$util.isNullOrEmpty($ctx.identity.claims.get(\\"bar\\")) )
-  $util.qr($ctx.args.input.put(\\"foo\\", \\"$ctx.identity.claims.get(\\"bar\\")\\"))
+#set( $claimValue = $ctx.identity.claims.get(\\"bar\\") )
+#if( !$util.isNullOrEmpty($claimValue) )
+  $util.qr($ctx.args.input.put(\\"foo\\", $claimValue))
+#else
+  $util.qr($ctx.args.input.remove(\\"foo\\"))
 #end
 ## [End] Setting \\"foo\\" to claim \\"bar\\". **
 
@@ -141,8 +144,11 @@ $util.error($ctx.error.message, $ctx.error.type)
 $util.toJson($ctx.result)
 #end",
   "Mutation.updateTodo.req.vtl": "## [Start] Setting \\"foo\\" to claim \\"bar\\". **
-#if( !$util.isNullOrEmpty($ctx.identity.claims.get(\\"bar\\")) )
-  $util.qr($ctx.args.input.put(\\"foo\\", \\"$ctx.identity.claims.get(\\"bar\\")\\"))
+#set( $claimValue = $ctx.identity.claims.get(\\"bar\\") )
+#if( !$util.isNullOrEmpty($claimValue) )
+  $util.qr($ctx.args.input.put(\\"foo\\", $claimValue))
+#else
+  $util.qr($ctx.args.input.remove(\\"foo\\"))
 #end
 ## [End] Setting \\"foo\\" to claim \\"bar\\". **
 

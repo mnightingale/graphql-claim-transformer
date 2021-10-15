@@ -6,7 +6,16 @@ import {
   ObjectTypeDefinitionNode,
   valueFromASTUntyped,
 } from 'graphql'
-import { iff, not, printBlock, qref, raw } from 'graphql-mapping-template'
+import {
+  compoundExpression,
+  ifElse,
+  not,
+  printBlock,
+  qref,
+  raw,
+  ref,
+  set,
+} from 'graphql-mapping-template'
 import { getBaseType, ResolverResourceIDs } from 'graphql-transformer-common'
 import {
   gql,
@@ -68,12 +77,14 @@ export class ClaimTransformer extends Transformer {
     claim: string,
   ) {
     const snippet = printBlock(`Setting "${field}" to claim "${claim}"`)(
-      iff(
-        not(raw(`$util.isNullOrEmpty($ctx.identity.claims.get("${claim}"))`)),
-        qref(
-          `$ctx.args.input.put("${field}", "$ctx.identity.claims.get("${claim}")")`,
+      compoundExpression([
+        set(ref('claimValue'), raw(`$ctx.identity.claims.get("${claim}")`)),
+        ifElse(
+          not(raw(`$util.isNullOrEmpty($claimValue)`)),
+          qref(`$ctx.args.input.put("${field}", $claimValue)`), // Use the value from claims
+          qref(`$ctx.args.input.remove("${field}")`), // Remove any user supplied value
         ),
-      ),
+      ]),
     )
     const resolver = ctx.getResource(mutationResolverLogicalId)
     if (resolver) {
